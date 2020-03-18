@@ -49,22 +49,26 @@ def classify(x, dataMat, labels, k):
 
 
 if __name__ == "__main__":
-    ratio = 0.2
+    #ratio = 0.2
     dataMat, classLabel = load_data("dataset.txt")
     dataMat, ranges, minVals = norm_data(dataMat)
     m = dataMat.shape[0]
-    numTestVecs = int(m * ratio)
+    #numTestVecs = int(m * ratio)
     errCount = 0
+    k = 3
+    '''
     for i in range(numTestVecs):
         result = classify(
-            dataMat[i], dataMat[numTestVecs:m], classLabel[numTestVecs:m], 3
+            dataMat[i], dataMat[numTestVecs:m], classLabel[numTestVecs:m], k
         )
         errCount += result != classLabel[i]
+    print(errCount)
+    '''
     resultList = ['not at all', 'in small doses', 'in large doses']
     percentTats = float(input("percentage of time spent playing video games ?"))
     ffMiles = float(input("frequent filer miles earned per year?"))
     iceCream = float(input("liters of ice cream consumed per year?"))
     inArr = np.array([ffMiles, percentTats, iceCream])
-    classifierResult = classify((inArr-minVals)/ranges,dataMat,classLabel, 3)
+    classifierResult = classify((inArr-minVals)/ranges,dataMat,classLabel, k)
     print("You will probably like this person: ", resultList[classifierResult - 1])
     
