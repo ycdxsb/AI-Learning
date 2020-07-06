@@ -5,19 +5,19 @@ import  torch.optim as optim
 from    torchvision import datasets, transforms
 
 
-batch_size=200
-learning_rate=0.01
+batch_size=32
+learning_rate=0.001
 epochs=10
 
 train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('../data', train=True, download=True,
+    datasets.MNIST('data', train=True,
                    transform=transforms.Compose([
                        transforms.ToTensor(),
                        transforms.Normalize((0.1307,), (0.3081,))
                    ])),
     batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('../data', train=False, transform=transforms.Compose([
+    datasets.MNIST('data', train=False, transform=transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,))
     ])),
@@ -31,29 +31,30 @@ class MLP(nn.Module):
         super(MLP, self).__init__()
 
         self.model = nn.Sequential(
-            nn.Linear(784, 200),
+            nn.Linear(784, 256),
             nn.LeakyReLU(inplace=True),
-            nn.Linear(200, 200),
+            nn.Linear(256, 128),
             nn.LeakyReLU(inplace=True),
-            nn.Linear(200, 10),
+            nn.Linear(128, 64),
             nn.LeakyReLU(inplace=True),
+            nn.Linear(64, 32),
+            nn.LeakyReLU(inplace=True),
+            nn.Linear(32, 10),
         )
 
     def forward(self, x):
         x = self.model(x)
-
         return x
 
-device = torch.device('cuda:0')
-net = MLP().to(device)
-optimizer = optim.SGD(net.parameters(), lr=learning_rate)
-criteon = nn.CrossEntropyLoss().to(device)
+
+net = MLP()
+optimizer = optim.Adam(net.parameters(), lr=learning_rate)
+criteon = nn.CrossEntropyLoss()
 
 for epoch in range(epochs):
 
     for batch_idx, (data, target) in enumerate(train_loader):
         data = data.view(-1, 28*28)
-        data, target = data.to(device), target.cuda()
 
         logits = net(data)
         loss = criteon(logits, target)
@@ -73,7 +74,6 @@ for epoch in range(epochs):
     correct = 0
     for data, target in test_loader:
         data = data.view(-1, 28 * 28)
-        data, target = data.to(device), target.cuda()
         logits = net(data)
         test_loss += criteon(logits, target).item()
 
